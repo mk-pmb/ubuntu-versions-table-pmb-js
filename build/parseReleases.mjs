@@ -64,7 +64,7 @@ async function cliMain() {
     rp(/\n[\w ]+ old releases can be accessed at [ -~]+(?=\n)/);
   }());
 
-  await prFs.writeFile('tmp.denoised.txt', srcText, 'UTF-8');
+  await prFs.writeFile('tmp.wikiDenoised.txt', srcText, 'UTF-8');
 
   const versionsDb = makeVersionsDb({
     updatedAtUnixtime: statUts,
@@ -120,7 +120,7 @@ async function cliMain() {
     ...versionsDb.data,
   }), 'UTF-8');
   const miniDb = compileMiniDb(versionsDb);
-  await prFs.writeFile('tmp.miniDb.json', miniDb, 'UTF-8');
+  await prFs.writeFile('../miniDb.json', miniDb, 'UTF-8');
 };
 
 

@@ -6,11 +6,25 @@ import rPad from 'lodash.padend';
 
 function oneLineJson(x) { return sortedJson(x).replace(/\n\s*/g, ' '); }
 
-const jsonify = JSON.stringify;
-
 function padJson(x, w) {
   const j = oneLineJson(x);
-  return (w > 0 ? rPad(j, w) : lPad(j, -w));
+  return (w > 0 ? rPad(j, w) : lPad(j, -w || 0));
+}
+
+const fieldDefs = [
+  { name: 'verNumYear',       width: -2 },
+  { name: 'verNumMonth',      width: -2 },
+  { name: 'verNumMaxPatch',   width: -2,  or: 0 },
+  { name: 'extraSupport',     width:  5 },
+  { name: 'codenameAdj',      width: 10 },
+  { name: 'codenameNoun' },
+];
+
+
+function renderField(fDef) {
+  let val = this[fDef.name];
+  if (fDef.or !== undefined) { val = (val || fDef.or); }
+  return padJson(val, fDef.width);
 }
 
 
@@ -18,17 +32,11 @@ function compileMiniDb(verDb) {
   const metaFacts = verDb.meta.facts;
   const entries = [
     sortedJson(metaFacts).replace(/\n/g, '\n  ').replace(/\s+\}$/, ' }'),
+    oneLineJson(fieldDefs.map(f => f.name)),
   ];
 
   function foundVersion(ubuVer) {
-    const fields = [
-      padJson(ubuVer.verNumYear, -2),
-      padJson(ubuVer.verNumMonth, -2),
-      padJson(ubuVer.verNumMaxPatch || 0, -2),
-      padJson(ubuVer.extraSupport || '', 5),
-      padJson(ubuVer.codenameAdj, 10),
-      jsonify(ubuVer.codenameNoun),
-    ];
+    const fields = fieldDefs.map(renderField.bind(ubuVer));
     const entry = ('[' + fields.join(', ') + ']');
     entries.push(entry);
   }
@@ -38,12 +46,8 @@ function compileMiniDb(verDb) {
   }
   verDb.entriesBySections().forEach(foundSection);
 
-  // [ { "updatedAtUnixtime": "stat.mtime" }
-  // , { "section": "current" }
-  // , [20, "04", 0, "LTS", "focal", "fossa"]
-  // ]
   const dbText = ('[' + entries.join('\n,') + '\n]\n');
-  console.log(dbText);
+  // console.log(dbText);
   return dbText;
 }
 

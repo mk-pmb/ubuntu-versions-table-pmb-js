@@ -16,6 +16,7 @@ Limitations
 * The database currently ignores:
   * Desktop-only versions.
   * Information about Extended Security Maintenance.
+  * Dates
 
 
 
