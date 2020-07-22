@@ -15,7 +15,7 @@ equal(dapper, {
   codenameNoun: 'Drake',
   codenameFull: 'Dapper Drake',
   extraSupport: 'LTS',
-  section: 'endOfLife',
+  phase: 'endOfLife',
 });
 equal(ubuntus.byCodename('dApPeR dRaKe'),       dapper);
 equal(ubuntus.byCodename('DappeR DrakE LtS'),   dapper);
@@ -32,8 +32,8 @@ equal(ubuntus.byVersion('6.06.2 LTS'),  { ...dapper, verNumPatch: 2 });
 equal(ubuntus.byVersion('6.06.2'),      { ...dapper, verNumPatch: 2 });
 equal(ubuntus.byVersion('6.06.3'),      false);
 
-equal(ubuntus.byCodename('focal').section,    'current');
-equal(ubuntus.byCodename('groovy').section,   'future');
+equal(ubuntus.byCodename('focal').phase,    'current');
+equal(ubuntus.byCodename('groovy').phase,   'future');
 
 
 

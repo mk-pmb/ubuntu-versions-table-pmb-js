@@ -41,7 +41,7 @@ function compileMiniDb(verDb) {
     entries.push(entry);
   }
   function foundSection(sect) {
-    entries.push(oneLineJson({ section: sect.name }));
+    entries.push(oneLineJson({ phase: sect.name }));
     sect.items.forEach(foundVersion);
   }
   verDb.entriesBySections().forEach(foundSection);

@@ -1,6 +1,6 @@
 [{ "updatedAtUnixtime": 1595275153 }
 ,[ "verNumYear", "verNumMonth", "verNumMaxPatch", "extraSupport", "codenameAdj", "codenameNoun" ]
-,{ "section": "endOfLife" }
+,{ "phase": "endOfLife" }
 ,[ 4, 10,  0, ""   , "Warty"   , "Warthog"]
 ,[ 5,  4,  0, ""   , "Hoary"   , "Hedgehog"]
 ,[ 5, 10,  0, ""   , "Breezy"  , "Badger"]
@@ -29,12 +29,12 @@
 ,[18, 10,  0, ""   , "Cosmic"  , "Cuttlefish"]
 ,[19,  4,  0, ""   , "Disco"   , "Dingo"]
 ,[19, 10,  0, ""   , "Eoan"    , "Ermine"]
-,{ "section": "current" }
+,{ "phase": "current" }
 ,[14,  4,  6, "LTS", "Trusty"  , "Tahr"]
 ,[16,  4,  6, "LTS", "Xenial"  , "Xerus"]
 ,[18,  4,  4, "LTS", "Bionic"  , "Beaver"]
 ,[20,  4,  0, "LTS", "Focal"   , "Fossa"]
-,{ "section": "future" }
+,{ "phase": "future" }
 ,[20, 10,  0, ""   , "Groovy"  , "Gorilla"]
 ,[21,  4,  0, ""   , ""        , ""]
 ,[21, 10,  0, ""   , ""        , ""]

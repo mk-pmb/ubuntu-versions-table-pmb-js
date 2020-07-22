@@ -4,6 +4,7 @@ import miniData from './miniDb.json';
 
 const [miniMeta, miniColNames, ...miniRecords] = miniData;
 
+const rowSectColName = 'phase';
 const rowSectProp = 's';
 
 const dataBy = {
@@ -15,7 +16,7 @@ const dataBy = {
 
 function rowToDict(r) {
   const s = r[rowSectProp];
-  const d = { section: s, ...dataBy.section.get(s).details };
+  const d = { [rowSectColName]: s, ...dataBy.section.get(s).details };
   miniColNames.forEach((k, i) => { d[k] = r[i]; });
   return d;
 }
@@ -34,7 +35,7 @@ function truthyLowerUnequal(ac, ex) { return ac && (ac !== lc(ex)); }
   let curSect = null;
   function parseRecord(rec) {
     if (!Array.isArray(rec)) {
-      const { section, ...details } = rec;
+      const { [rowSectColName]: section, ...details } = rec;
       curSect = section;
       dictMapAdd(dataBy.section, curSect, Object.assign([], { details }));
       return;
