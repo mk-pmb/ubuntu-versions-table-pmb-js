@@ -6,7 +6,7 @@ import ubuntus from '..';
 
 const dapper = ubuntus.byCodename('dapper');
 equal(dapper, {
-  verNumBase: '6.06',
+  release: '6.06',
   verNumYear: 6,
   verNumMonth: 6,
   verNumMaxPatch: 2,

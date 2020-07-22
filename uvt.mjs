@@ -10,8 +10,11 @@ const rowSectProp = 's';
 const dataBy = {
   codenameApt: new Map(),
   section: new Map(),
-  verNumBase: new Map(),
+  release: new Map(),
 };
+
+
+function apt2rls(cn) { return (dataBy.codenameApt.get(cn) || false); }
 
 
 function rowToDict(r) {
@@ -42,20 +45,20 @@ function truthyLowerUnequal(ac, ex) { return ac && (ac !== lc(ex)); }
     }
     rec[rowSectProp] = curSect; // eslint-disable-line no-param-reassign
     const { verNumYear, verNumMonth, codenameAdj: cna } = rowToDict(rec);
-    const vnb = verNumYear + '.' + minDigits2(verNumMonth);
-    dataBy.section.get(curSect).push(vnb);
-    dictMapAdd(dataBy.verNumBase, vnb, rec);
-    if (cna) { dictMapAdd(dataBy.codenameApt, lc(cna), vnb); }
+    const rls = verNumYear + '.' + minDigits2(verNumMonth);
+    dataBy.section.get(curSect).push(rls);
+    dictMapAdd(dataBy.release, rls, rec);
+    if (cna) { dictMapAdd(dataBy.codenameApt, lc(cna), rls); }
   }
   miniRecords.forEach(parseRecord);
 }());
 
 
-function byVerNumBase(verNumBase) {
-  if (!verNumBase) { return false; }
-  const miniRow = dataBy.verNumBase.get(verNumBase);
+function byRelease(rls) {
+  if (!rls) { return false; }
+  const miniRow = dataBy.release.get(rls);
   if (!miniRow) { return false; }
-  const entry = { verNumBase, ...rowToDict(miniRow) };
+  const entry = { release: rls, ...rowToDict(miniRow) };
   const cna = entry.codenameAdj;
   return {
     ...entry,
@@ -78,7 +81,7 @@ function byVersion(year, month, patch) {
   }
   const verNumPatch = (+patch || 0);
   if (verNumPatch < 0) { return false; }
-  const entry = byVerNumBase(year + '.' + minDigits2(month));
+  const entry = byRelease(year + '.' + minDigits2(month));
   if (verNumPatch > entry.verNumMaxPatch) { return false; }
   return entry && { ...entry, verNumPatch };
 }
@@ -90,8 +93,8 @@ function byCodename(name) {
   if (words.length > 3) { return false; }
   const [cnAdj, cnNoun, support] = words;
   if (!cnAdj) { return false; }
-  const vnb = dataBy.codenameApt.get(cnAdj);
-  const entry = byVerNumBase(vnb);
+  const rls = apt2rls(cnAdj);
+  const entry = byRelease(rls);
   if (truthyLowerUnequal(cnNoun, entry.codenameNoun)) { return false; }
   if (truthyLowerUnequal(support, entry.extraSupport)) { return false; }
   return entry;
@@ -102,7 +105,7 @@ const verDb = {
   meta: miniMeta,
   dataBy,
   byCodename,
-  byVerNumBase,
+  byRelease,
   byVersion,
 };
 
