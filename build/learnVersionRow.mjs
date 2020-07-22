@@ -12,6 +12,11 @@ const ignoreCells = [
   'endOfLife', // date
 ];
 
+const codenamePartKeys = [
+  'codenameAdj',
+  'codenameNoun',
+];
+
 
 function learn(verDb, cellsByColName) {
   const {
@@ -37,12 +42,10 @@ function learn(verDb, cellsByColName) {
   const cnParts = (cnNotDecidedYet
     ? ['', '']
     : mustBe('ofLength:2', 'Code name words')(cnFull.split(/\s+/)));
-  const [codenameAdj, codenameNoun] = cnParts;
+  const cnFacts = {};
+  codenamePartKeys.forEach((key, idx) => { cnFacts[key] = cnParts[idx]; });
 
-  const patch = descr.verNumPatch;
-  if (patch > ubuVer.getFact('verNumMaxPatch', 0)) {
-    ubuVer.forceUpdateFacts({ verNumMaxPatch: patch });
-  }
+  ubuVer.declareMaxNum('verNumMaxPatch', descr.verNumPatch);
   delete descr.verNumPatch;
   delete descr.verNumFull;
 
@@ -67,9 +70,7 @@ function learn(verDb, cellsByColName) {
   ubuVer.declareFacts({
     codenameFull: cnFull,
     ...descr,
-    codenameAdj,
-    codenameNoun,
-    codenameWeb: codenameAdj.toLowerCase(),
+    ...cnFacts,
     section,
   });
   mustPop.expectEmpty('Unsupported cells');

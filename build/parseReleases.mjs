@@ -10,6 +10,7 @@ import sortedJson from 'sortedjson';
 import makeVersionsDb from './makeVersionsDb';
 import learnVersionRow from './learnVersionRow';
 import learnExtSecRow from './learnExtSecRow';
+import compileMiniDb from './compileMiniDb';
 
 const quot = JSON.stringify;
 
@@ -65,7 +66,10 @@ async function cliMain() {
 
   await prFs.writeFile('tmp.denoised.txt', srcText, 'UTF-8');
 
-  const versionsDb = makeVersionsDb();
+  const versionsDb = makeVersionsDb({
+    updatedAtUnixtime: statUts,
+  });
+
   srcText.split(/\n+(?=={2})/).forEach(function learnSect(sectText) {
     if (!sectText) { return; }
     const [sectCaptionLine, ...sectLines] = sectText.split(/\n/);
@@ -111,10 +115,12 @@ async function cliMain() {
     });
   });
 
-  await prFs.writeFile('tmp.db.json', sortedJson({
-    updatedAtUnixtime: statUts,
+  await prFs.writeFile('tmp.fullDb.json', sortedJson({
+    meta: versionsDb.meta.facts,
     ...versionsDb.data,
   }), 'UTF-8');
+  const miniDb = compileMiniDb(versionsDb);
+  await prFs.writeFile('tmp.miniDb.json', miniDb, 'UTF-8');
 };
 
 

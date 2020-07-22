@@ -9,48 +9,62 @@ import mustBe from 'typechecks-pmb/must-be';
 const quot = JSON.stringify;
 
 
-const versionApi = {
+const factFuncs = {
 
-  getFact(key, dflt) { return getOwn(this.entry, key, dflt); },
+  getFact(key, dflt) { return getOwn(this.facts, key, dflt); },
 
-  forceUpdateFacts(facts) {
-    mustBe('dictObj', 'New facts')(facts);
-    return Object.assign(this.entry, facts);
+  forceUpdateFacts(upd) {
+    mustBe('dictObj', 'New facts')(upd);
+    return Object.assign(this.facts, upd);
   },
 
-  declareFacts(facts) {
-    mustBe('dictObj', 'New facts')(facts);
-    const { entry } = this;
-    mustBe('dictObj', 'Database record')(entry);
-    aMap(facts, function learnOneFact(val, key) {
+  declareFacts(upd) {
+    mustBe('dictObj', 'New facts')(upd);
+    const { facts } = this;
+    mustBe('dictObj', 'Database record')(facts);
+    aMap(upd, function learnOneFact(val, key) {
       if (val === undefined) { return; }
-      const old = getOwn(entry, key);
+      const old = getOwn(facts, key);
       if (old === val) { return; }
       if (old !== undefined) {
-        const err = ('Conflicting values for Ubuntu ' + entry.verNumBase
+        const err = ('Conflicting values for Ubuntu ' + facts.verNumBase
           + ': key=' + quot(key)
           + ', old=' + quot(old)
           + ', new=' + quot(val));
         throw new Error(err);
       }
-      entry[key] = val;
+      facts[key] = val;
     });
+  },
+
+  declareMaxNum(key, val) {
+    if (!val) { return; }
+    const { facts } = this;
+    if (val > getOwn(facts, key, 0)) { facts[key] = val; }
   },
 
 };
 
 
-function makeVersionsDb() {
+function makeVersionsDb(meta) {
   const data = {};
 
   function byVnBase(verNumBase) {
-    const entry = getOrAddKey(data, verNumBase, [{ verNumBase }]);
-    return { ...versionApi, entry };
+    const facts = getOrAddKey(data, verNumBase, [{ verNumBase }]);
+    return { ...factFuncs, facts };
+  }
+
+  function versionSort(a, b) {
+    const majDiff = (a.verNumMajor - b.verNumMajor);
+    if (majDiff !== 0) { return majDiff; }
+    return (a.verNumMinor - b.verNumMinor);
   }
 
   const db = {
+    meta: { ...factFuncs, facts: meta },
     data,
     byVnBase,
+    entriesSorted() { return Object.values(data).sort(versionSort); },
   };
   return db;
 }
