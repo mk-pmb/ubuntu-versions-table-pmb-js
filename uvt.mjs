@@ -104,6 +104,7 @@ function byCodename(name) {
 const verDb = {
   meta: miniMeta,
   dataBy,
+  apt2rls,
   byCodename,
   byRelease,
   byVersion,

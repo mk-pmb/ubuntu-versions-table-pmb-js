@@ -35,6 +35,9 @@ equal(ubuntus.byVersion('6.06.3'),      false);
 equal(ubuntus.byCodename('focal').phase,    'current');
 equal(ubuntus.byCodename('groovy').phase,   'future');
 
+equal(ubuntus.apt2rls('warty'), '4.10');
+equal(ubuntus.apt2rls('Warty'), false);
+
 
 
 

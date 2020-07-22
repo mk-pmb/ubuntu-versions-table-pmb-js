@@ -34,8 +34,16 @@ Look up details about an Ubuntu version by version, given as a string.
 ### .byVersion(year, month[, patch])
 Look up details about an Ubuntu version by version parts given as numbers.
 
-### Result data format
+### .byRelease(rls)
+Look up details about an Ubuntu version by release name,
+i.e. "year dot two-digit-month".
+
+### Result data format for .by*()
 see [test/usage.mjs](test/usage.mjs)
+
+### .apt2rls(cn)
+Efficient lookup the release name string by lowercase codename adjective
+(`codenameApt`).
 
 
 
