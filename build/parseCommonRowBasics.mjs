@@ -18,16 +18,16 @@ function parseDescr(descr) {
   verifyProduct(product);
   const vnPt = mustBe('maxLength:3',
     'version number parts')(verNumFull.split(/\./));
-  const verNumMajor = mustBe('pos int', 'major version')(+vnPt[0]);
-  const verNumMinor = +mustBe.oneOf([
-    (verNumMajor === 6 ? '06' : '04'),
+  const verNumYear = mustBe('pos int', 'major version (year)')(+vnPt[0]);
+  const verNumMonth = +mustBe.oneOf([
+    (verNumYear === 6 ? '06' : '04'),
     '10',
-  ], 'minor version')(vnPt[1]);
+  ], 'minor version (month)')(vnPt[1]);
   const facts = {
     verNumFull,
     verNumBase: vnPt.slice(0, 2).join('.'),
-    verNumMajor,
-    verNumMinor,
+    verNumYear,
+    verNumMonth,
     verNumPatch: mustBe('pos0 int', 'patch version')(+(vnPt[2] || 0)),
     extraSupport: (verifySupportIndicator(edition) || ''),
   };

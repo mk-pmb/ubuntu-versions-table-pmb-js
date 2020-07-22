@@ -6,9 +6,9 @@ import factFuncs from './verDbFactFuncs';
 
 
 function versionSort(a, b) {
-  const majDiff = (a.verNumMajor - b.verNumMajor);
+  const majDiff = (a.verNumYear - b.verNumYear);
   if (majDiff !== 0) { return majDiff; }
-  return (a.verNumMinor - b.verNumMinor);
+  return (a.verNumMonth - b.verNumMonth);
 }
 
 

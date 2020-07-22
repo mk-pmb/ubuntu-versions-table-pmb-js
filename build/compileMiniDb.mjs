@@ -22,8 +22,8 @@ function compileMiniDb(verDb) {
 
   function foundVersion(ubuVer) {
     const fields = [
-      padJson(ubuVer.verNumMajor, -2),
-      jsonify(lPad(ubuVer.verNumMinor, 2, '0')),
+      padJson(ubuVer.verNumYear, -2),
+      padJson(ubuVer.verNumMonth, -2),
       padJson(ubuVer.verNumMaxPatch || 0, -2),
       padJson(ubuVer.extraSupport || '', 5),
       padJson(ubuVer.codenameAdj, 10),
