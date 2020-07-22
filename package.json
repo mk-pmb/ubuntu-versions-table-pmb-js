@@ -16,8 +16,8 @@
 
   "private": false, "license": "ISC",
 
-  "main": "uvt.js",
   "scripts": { "test": "nodemjs test/all.mjs" },
+  "main": "uvt.mjs",
   "directories": { "test": "test" },
 
   "dependencies": {},
