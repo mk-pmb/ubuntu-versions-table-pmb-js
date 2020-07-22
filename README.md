@@ -6,7 +6,7 @@ ubuntu-versions-table-pmb
 
 <!--#echo json="package.json" key="description" -->
 Static information about Ubuntu releases. Can find release by codename and
-reverse.
+vice versa.
 <!--/#echo -->
 
 
@@ -23,13 +23,27 @@ Limitations
 API
 ---
 
-:TODO:
+This module ESM-exports an object that holds these functions:
+
+### .byCodename(name)
+Look up details about an Ubuntu version by codename.
+
+### .byVersion(ver)
+Look up details about an Ubuntu version by version, given as a string.
+
+### .byVersion(year, month[, patch])
+Look up details about an Ubuntu version by version parts given as numbers.
+
+### Result data format
+see [test/usage.mjs](test/usage.mjs)
+
+
 
 
 Usage
 -----
 
-:TODO:
+see [test/usage.mjs](test/usage.mjs)
 
 
 <!--#toc stop="scan" -->

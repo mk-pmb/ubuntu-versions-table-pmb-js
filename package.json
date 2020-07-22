@@ -1,6 +1,6 @@
 { "name": "ubuntu-versions-table-pmb",
   "version": "0.1.0",
-  "description": "Static information about Ubuntu releases. Can find release by codename and reverse.",
+  "description": "Static information about Ubuntu releases. Can find release by codename and vice versa.",
   "keywords": [],
 
   "author": "M.K. (https://github.com/mk-pmb)",
@@ -16,12 +16,13 @@
 
   "private": false, "license": "ISC",
 
-  "scripts": { "test": "nodemjs test/all.mjs" },
   "main": "uvt.mjs",
+  "scripts": { "test": "nodemjs test/all.mjs" },
   "directories": { "test": "test" },
 
   "dependencies": {},
   "devDependencies": {
+    "equal-pmb": "^0.1.20",
     "getoraddkey-simple": "^0.1.6",
     "getown": "^1.0.0",
     "lodash.camelcase": "^4.3.0",
