@@ -14,9 +14,6 @@ const dataBy = {
 };
 
 
-function apt2rls(cn) { return (dataBy.codenameApt.get(cn) || false); }
-
-
 function rowToDict(r) {
   const s = r[rowSectProp];
   const d = { [rowSectColName]: s, ...dataBy.section.get(s).details };
@@ -53,61 +50,79 @@ function truthyLowerUnequal(ac, ex) { return ac && (ac !== lc(ex)); }
   miniRecords.forEach(parseRecord);
 }());
 
-
-function byRelease(rls) {
-  if (!rls) { return false; }
-  const miniRow = dataBy.release.get(rls);
-  if (!miniRow) { return false; }
-  const entry = { release: rls, ...rowToDict(miniRow) };
-  const cna = entry.codenameAdj;
-  return {
-    ...entry,
-    codenameFull: [cna, entry.codenameNoun].join(' '),
-    codenameApt: lc(cna),
-  };
-}
-
-
-function byVersion(year, month, patch) {
-  if (typeof year === 'string') {
-    const words = findWords(lc(year));
-    if (words.length > 2) { return false; }
-    const [version, support] = words;
-    const verNums = version.split(/\./);
-    if ((verNums[1] || false).length !== 2) { return false; }
-    const entry = byVersion(...verNums.map(Number));
-    if (truthyLowerUnequal(support, entry.extraSupport)) { return false; }
-    return entry;
-  }
-  const verNumPatch = (+patch || 0);
-  if (verNumPatch < 0) { return false; }
-  const entry = byRelease(year + '.' + minDigits2(month));
-  if (verNumPatch > entry.verNumMaxPatch) { return false; }
-  return entry && { ...entry, verNumPatch };
-}
-
-
-function byCodename(name) {
-  if (!name) { return false; }
-  const words = findWords(lc(name));
-  if (words.length > 3) { return false; }
-  const [cnAdj, cnNoun, support] = words;
-  if (!cnAdj) { return false; }
-  const rls = apt2rls(cnAdj);
-  const entry = byRelease(rls);
-  if (truthyLowerUnequal(cnNoun, entry.codenameNoun)) { return false; }
-  if (truthyLowerUnequal(support, entry.extraSupport)) { return false; }
-  return entry;
-}
-
-
 const verDb = {
   meta: miniMeta,
   dataBy,
-  apt2rls,
-  byCodename,
-  byRelease,
-  byVersion,
+
+  apt2rls(cn) { return (dataBy.codenameApt.get(cn) || false); },
+
+  byRelease(rls) {
+    if (!rls) { return false; }
+    const miniRow = dataBy.release.get(rls);
+    if (!miniRow) {
+      const bad = (/[\sA-Za-z]+/.exec(rls) || false)[0];
+      if (!bad) { return false; }
+      throw new Error('Invalid fragment in release name: "' + bad + '"');
+    }
+    const entry = { release: rls, ...rowToDict(miniRow) };
+    const cna = entry.codenameAdj;
+    return {
+      ...entry,
+      codenameFull: [cna, entry.codenameNoun].join(' '),
+      codenameApt: lc(cna),
+    };
+  },
+
+  byVersion(year, month, patch) {
+    if (typeof year === 'string') {
+      const words = findWords(lc(year));
+      if (words.length > 2) { return false; }
+      const [version, support] = words;
+      const verNums = version.split(/\./);
+      if ((verNums[1] || false).length !== 2) { return false; }
+      const entry = verDb.byVersion(...verNums.map(Number));
+      if (truthyLowerUnequal(support, entry.extraSupport)) { return false; }
+      return entry;
+    }
+    const verNumPatch = (+patch || 0);
+    if (verNumPatch < 0) { return false; }
+    const entry = verDb.byRelease(year + '.' + minDigits2(month));
+    if (verNumPatch > entry.verNumMaxPatch) { return false; }
+    return entry && { ...entry, verNumPatch };
+  },
+
+  byCodename(name) {
+    if (!name) { return false; }
+    const words = findWords(lc(name));
+    if (words.length > 3) { return false; }
+    const [cnAdj, cnNoun, support] = words;
+    if (!cnAdj) { return false; }
+    const rls = verDb.apt2rls(cnAdj);
+    const entry = verDb.byRelease(rls);
+    if (truthyLowerUnequal(cnNoun, entry.codenameNoun)) { return false; }
+    if (truthyLowerUnequal(support, entry.extraSupport)) { return false; }
+    return entry;
+  },
+
+  mustFind: (function compile() {
+    function nope(mtd, args) {
+      let by = String(mtd).replace(/^by\w/, r => r.slice(2).toLowerCase());
+      if (by === 'version') { by += ' number'; }
+      const e = new Error(`Cannot find Ubuntu version by ${by} ${
+        args.map(JSON.stringify).join(', ')}.`);
+      throw e;
+    }
+    return function makeMustFind(mtd) {
+      const f = verDb[mtd];
+      if (typeof f !== 'function') {
+        throw new Error('Unsupported lookup method: ' + mtd);
+      }
+      function mustFind(...args) { return (f(...args) || nope(mtd, args)); }
+      return mustFind;
+    };
+  }()),
+
 };
+
 
 export default verDb;

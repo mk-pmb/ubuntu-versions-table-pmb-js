@@ -38,6 +38,10 @@ Look up details about an Ubuntu version by version parts given as numbers.
 Look up details about an Ubuntu version by release name,
 i.e. "year dot two-digit-month".
 
+### .mustFind(mtd, ...args)
+Delegate to the method whose name is given in string `mtd`,
+passing arguments `...args`, throw an error if the result is false-y.
+
 ### Result data format for .by*()
 see [test/usage.mjs](test/usage.mjs)
 

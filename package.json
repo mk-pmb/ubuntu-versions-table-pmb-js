@@ -1,5 +1,5 @@
 { "name": "ubuntu-versions-table-pmb",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Static information about Ubuntu releases. Can find release by codename and vice versa.",
   "keywords": [],
 
