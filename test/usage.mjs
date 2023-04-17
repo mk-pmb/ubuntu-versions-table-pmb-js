@@ -2,7 +2,7 @@
 
 import eq from 'equal-pmb';
 
-import ubuntus from '..';
+import ubuntus from '../uvt.mjs';
 
 const dapper = ubuntus.byCodename('dapper');
 eq(dapper, {
@@ -37,7 +37,8 @@ eq(ubuntus.byVersion('6.06.3'),     false);
 
 // Life cycle phase:
 eq(ubuntus.byCodename('focal').phase,   'current');
-eq(ubuntus.byCodename('groovy').phase,  'future');
+eq(ubuntus.byCodename('groovy').phase,  'endOfLife');
+eq(ubuntus.byCodename('lunar').phase,   'future');
 
 // Release lookup shortcut:
 eq(ubuntus.apt2rls('warty'), '4.10');

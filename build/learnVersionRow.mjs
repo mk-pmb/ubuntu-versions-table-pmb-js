@@ -2,7 +2,7 @@
 
 import mustBe from 'typechecks-pmb/must-be';
 
-import rowBasics from './parseCommonRowBasics';
+import rowBasics from './parseCommonRowBasics.mjs';
 
 
 const ignoreCells = [

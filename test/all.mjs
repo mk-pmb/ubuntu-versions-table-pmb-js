@@ -3,6 +3,6 @@
 import 'p-fatal';
 import 'usnam-pmb';
 
-import './usage';
+import './usage.mjs';
 
 console.info('+OK all tests passed.');

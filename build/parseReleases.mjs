@@ -7,10 +7,10 @@ import toCamelCase from 'lodash.camelcase';
 import mustBe from 'typechecks-pmb/must-be';
 import sortedJson from 'sortedjson';
 
-import makeVersionsDb from './makeVersionsDb';
-import learnVersionRow from './learnVersionRow';
-import learnExtSecRow from './learnExtSecRow';
-import compileMiniDb from './compileMiniDb';
+import makeVersionsDb from './makeVersionsDb.mjs';
+import learnVersionRow from './learnVersionRow.mjs';
+import learnExtSecRow from './learnExtSecRow.mjs';
+import compileMiniDb from './compileMiniDb.mjs';
 
 const quot = JSON.stringify;
 
@@ -47,8 +47,13 @@ async function cliMain() {
   }());
 
   (function cutBoringSections() {
+    let sections = srcText.split(/(?=\n={2,4})/);
     const hasVersion = makeRgxMatcher(/(^|\n)#{2}\d/);
-    srcText = srcText.split(/(?=\n={2,4})/).filter(hasVersion).join('');
+    sections = sections.filter(hasVersion);
+    sections = sections.filter(s => !(
+      s.startsWith('\n=== Extended Security Maintenance ===\n')
+    ));
+    srcText = sections.join('');
   }());
 
   (function cutMiscNoise() {

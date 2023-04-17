@@ -2,7 +2,7 @@
 
 import getOrAddKey from 'getoraddkey-simple';
 
-import factFuncs from './verDbFactFuncs';
+import factFuncs from './verDbFactFuncs.mjs';
 
 
 function versionSort(a, b) {

@@ -2,8 +2,8 @@
 
 import mustBe from 'typechecks-pmb/must-be';
 
-import rowBasics from './parseCommonRowBasics';
-import learnDateCells from './learnDateCells';
+import rowBasics from './parseCommonRowBasics.mjs';
+import learnDateCells from './learnDateCells.mjs';
 
 const ignoreCells = [
   'ofYears',
