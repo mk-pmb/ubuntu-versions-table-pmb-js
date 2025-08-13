@@ -1,4 +1,4 @@
-[{ "updatedAtUnixtime": 1681700231 }
+[{ "updatedAtUnixtime": 1755068176, "nVersions": 43 }
 ,[ "verNumYear", "verNumMonth", "verNumMaxPatch", "extraSupport", "codenameAdj", "codenameNoun" ]
 ,{ "phase": "endOfLife" }
 ,[ 4, 10,  0, ""   , "Warty"   , "Warthog"]
@@ -32,13 +32,19 @@
 ,[20, 10,  0, ""   , "Groovy"  , "Gorilla"]
 ,[21,  4,  0, ""   , "Hirsute" , "Hippo"]
 ,[21, 10,  0, ""   , "Impish"  , "Indri"]
+,[22, 10,  0, ""   , "Kinetic" , "Kudu"]
+,[23,  4,  0, ""   , "Lunar"   , "Lobster"]
+,[23, 10,  0, ""   , "Mantic"  , "Minotaur"]
+,[24, 10,  0, ""   , "Oracular", "Oriole"]
+,{ "phase": "ubuntuProWithLegacySupportAddon" }
+,[14,  4,  6, "ESM", "Trusty"  , "Tahr"]
 ,{ "phase": "current" }
-,[14,  4,  6, "LTS", "Trusty"  , "Tahr"]
 ,[16,  4,  7, "LTS", "Xenial"  , "Xerus"]
 ,[18,  4,  6, "LTS", "Bionic"  , "Beaver"]
-,[20,  4,  5, "LTS", "Focal"   , "Fossa"]
-,[22,  4,  2, "LTS", "Jammy"   , "Jellyfish"]
-,[22, 10,  0, ""   , "Kinetic" , "Kudu"]
+,[20,  4,  6, "LTS", "Focal"   , "Fossa"]
+,[22,  4,  5, "LTS", "Jammy"   , "Jellyfish"]
+,[24,  4,  3, "LTS", "Noble"   , "Numbat"]
+,[25,  4,  0, ""   , "Plucky"  , "Puffin"]
 ,{ "phase": "future" }
-,[23,  4,  0, ""   , "Lunar"   , "Lobster"]
+,[25, 10,  0, ""   , "Questing", "Quokka"]
 ]
