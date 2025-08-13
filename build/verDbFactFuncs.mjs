@@ -2,7 +2,7 @@
 
 import getOwn from 'getown';
 import aMap from 'map-assoc-core';
-import mustBe from 'typechecks-pmb/must-be';
+import mustBe from 'typechecks-pmb/must-be.js';
 
 const quot = JSON.stringify;
 

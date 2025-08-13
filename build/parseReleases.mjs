@@ -4,7 +4,7 @@ import 'p-fatal';
 import 'usnam-pmb';
 import prFs from 'nofs';
 import toCamelCase from 'lodash.camelcase';
-import mustBe from 'typechecks-pmb/must-be';
+import mustBe from 'typechecks-pmb/must-be.js';
 import sortedJson from 'sortedjson';
 
 import makeVersionsDb from './makeVersionsDb.mjs';
