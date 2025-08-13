@@ -22,7 +22,7 @@ function learn(verDb, cellsByColName) {
       startOfEsm: 'esmSince',
     },
   });
-  mustPop.expectEmpty('Unsupported cells');
+  mustPop.expectEmpty('Unsupported cells in ESM table');
 }
 
 Object.assign(learn, {

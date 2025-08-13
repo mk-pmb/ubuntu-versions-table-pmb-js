@@ -29,9 +29,8 @@ function renderField(fDef) {
 
 
 function compileMiniDb(verDb) {
-  const metaFacts = verDb.meta.facts;
   const entries = [
-    sortedJson(metaFacts).replace(/\n/g, '\n  ').replace(/\s+\}$/, ' }'),
+    JSON.stringify(verDb.meta.facts, null, 2).replace(/\n\s*/g, ' '),
     oneLineJson(fieldDefs.map(f => f.name)),
   ];
 

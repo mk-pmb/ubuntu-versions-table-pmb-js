@@ -19,12 +19,16 @@ function makeRgxMatcher(rx) { return rx.exec.bind(rx); }
 function trimStr(s) { return s.trim(); }
 function badVal(val, why) { throw new Error(why + ': ' + quot(val)); }
 
-const lookupSectAlias = mustBe.tProp('Section alias for section caption ', {
+const sectAliases = {
   current: null,
   endOfLife: null,
-  future: null,
+  expandedSecurityMaintenance: 'extSec',
   extendedSecurityMaintenance: 'extSec',
-}, 'nul | nonEmpty str');
+  future: null,
+  ubuntuProWithLegacySupportAddon: null,
+};
+const lookupSectAlias = mustBe.tProp('Section alias for section caption ',
+  sectAliases, 'nul | nonEmpty str');
 
 
 const rowParserBySect = {
@@ -33,7 +37,7 @@ const rowParserBySect = {
 
 
 async function cliMain() {
-  const srcPath = 'releases.txt';
+  const srcPath = (process.env.RELEASES_FILE || 'releases.txt');
   let srcText = await prFs.readFile(srcPath, 'UTF-8');
   function rp(r, t) { srcText = srcText.replace(r, t || ''); }
 
@@ -67,6 +71,7 @@ async function cliMain() {
     rp(/\n[\w ]+ are posted on the \S+ mailing list\.?(?=\n)/);
     rp(/\n[\w ]+ is a paid option [ -~]+(?=\n)/);
     rp(/\n[\w ]+ old releases can be accessed at [ -~]+(?=\n)/);
+    rp(/\n[ -~]+ provides security updates on Ubuntu LTS releases[ -~]+(?=\n)/g);
   }());
 
   await prFs.writeFile('tmp.wikiDenoised.txt', srcText, 'UTF-8');
@@ -78,13 +83,17 @@ async function cliMain() {
   srcText.split(/\n+(?=={2})/).forEach(function learnSect(sectText) {
     if (!sectText) { return; }
     const [sectCaptionLine, ...sectLines] = sectText.split(/\n/);
-    const sectCaption = ((/^={2,3}([\w ]+)={2,3}$/.exec(sectCaptionLine)
-      || false)[1] || '').trim();
-    if (!sectCaption) {
+    const sectCamel = (function camelizeSectionCaption() {
+      let sc = /^={2,3}([\w \-]+)={2,3}$/.exec(sectCaptionLine);
+      sc = ((sc || false)[1] || '').trim();
+      sc = sc.replace(/(^| )(\w+)-(\w+)(?= |$)/g, '$1$2$3');
+      sc = toCamelCase(sc.toLowerCase());
+      return sc;
+    }());
+    if (!sectCamel) {
       const preview = quot(sectText.slice(0, 64));
       throw new Error('Unable to find section title in ' + preview + '…');
     }
-    const sectCamel = toCamelCase(sectCaption);
     const sectAlias = (lookupSectAlias(sectCamel) || sectCamel);
     let colNames;
     sectLines.forEach(function readSectLine(ln) {
@@ -120,12 +129,15 @@ async function cliMain() {
     });
   });
 
+  const meta = versionsDb.meta.facts;
+  meta.nVersions = Object.keys(versionsDb.data).length;
   await prFs.writeFile('tmp.fullDb.json', sortedJson({
-    meta: versionsDb.meta.facts,
+    meta,
     ...versionsDb.data,
   }), 'UTF-8');
   const miniDb = compileMiniDb(versionsDb);
   await prFs.writeFile('../miniDb.json', miniDb, 'UTF-8');
+  console.info('+OK Done, ' + meta.nVersions + ' versions in DB.');
 };
 
 

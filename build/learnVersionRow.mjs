@@ -7,15 +7,30 @@ import rowBasics from './parseCommonRowBasics.mjs';
 
 const ignoreCells = [
   'docs', // links to release notes and/or changes
-  'release', // date
-  'endOfStandardSupport', // date
   'endOfLife', // date
+  'endOfStandardSupport', // date
+  'release', // date
+  'schedule', // roadmap in "future" versions table
 ];
 
-const codenamePartKeys = [
-  'codenameAdj',
-  'codenameNoun',
+
+const sectionsWithoutInterestingNewDetails = [
+  'extSec',
+  'ubuntuProWithLegacySupportAddon',
 ];
+
+
+const acceptableSectionProgression = [
+  'future',
+  'current',
+  'extSec',
+  'ubuntuProWithLegacySupportAddon',
+];
+
+
+const codeNameWordsRgx = Object.assign(/^(\w+) (\w+)(?: \((\w+)\)|)$/, {
+  copyProps: ['codenameFull', 'codenameAdj', 'codenameNoun'],
+});
 
 
 function learn(verDb, cellsByColName) {
@@ -28,28 +43,47 @@ function learn(verDb, cellsByColName) {
 
   const section = mustPop.nest('section');
   const oldSect = ubuVer.getFact('section');
-  if ((section === 'future') && (oldSect === 'current')) {
-    // The upcoming next version
-    ubuVer.forceUpdateFacts({ section });
+  if ((oldSect !== undefined) && (section !== oldSect)) {
+    const oldStage = acceptableSectionProgression.indexOf(oldSect);
+    const curStage = acceptableSectionProgression.indexOf(section);
+    if ((oldStage >= 0) && (curStage > oldStage)) {
+      ubuVer.forceUpdateFacts({ section });
+    } else {
+      const msg = ('Unexpected section progression: '
+        + oldSect + '=' + oldStage + ' -> '
+        + section + '=' + curStage);
+      throw new Error(msg);
+    }
   }
 
-  const cnFull = mustPop.nest('codeName').replace(/ \((\w+)\)$/, (m, a) => {
-    audience = (m && a).toLowerCase();
-    return '';
-  });
-  const cnNotDecidedYet = ((cnFull.length === 2)
-    && (cnFull.slice(0, 1) === cnFull.slice(1)));
-  const cnParts = (cnNotDecidedYet
-    ? ['', '']
-    : mustBe('ofLength:2', 'Code name words')(cnFull.split(/\s+/)));
+
   const cnFacts = {};
-  codenamePartKeys.forEach((key, idx) => { cnFacts[key] = cnParts[idx]; });
+  if (sectionsWithoutInterestingNewDetails.includes(section)) {
+    const { extraSupport } = descr;
+    if (extraSupport === 'ESM') {
+      if (ubuVer.getFact('extraSupport') === 'LTS') {
+        ubuVer.forceUpdateFacts({ extraSupport });
+      }
+    }
+    return;
+  }
+
+  (function decodeCodeName() {
+    const cnRaw = mustPop.nest('codeName');
+    const words = codeNameWordsRgx.exec(cnRaw);
+    mustBe.ary('Code name words regexp match', words);
+    codeNameWordsRgx.copyProps.forEach(
+      function copy(slot, idx) { cnFacts[slot] = words[idx]; });
+    audience = (words[3] || '').toLowerCase();
+  }());
 
   ubuVer.declareMaxNum('verNumMaxPatch', descr.verNumPatch);
   delete descr.verNumPatch;
   delete descr.verNumFull;
+  if (descr.verNumYear <= 8) { delete cnFacts.codenameFull; }
 
   function audienceIgnoreDesktop() {
+    // Very ancient Ubuntus had separate versions for desktop and server.
     if (!audience) { return; }
     if (audience === 'desktop') {
       mustBe.oneOf([
@@ -68,13 +102,13 @@ function learn(verDb, cellsByColName) {
   if (audienceIgnoreDesktop()) { return; }
 
   ubuVer.declareFacts({
-    codenameFull: cnFull,
     ...descr,
     ...cnFacts,
     section,
   });
-  mustPop.expectEmpty('Unsupported cells');
+  mustPop.expectEmpty('Unsupported cells in table ' + section);
 }
+
 
 Object.assign(learn, {
   ignoreCells,

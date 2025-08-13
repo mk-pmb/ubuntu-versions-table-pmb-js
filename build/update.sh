@@ -14,7 +14,7 @@ function update_releases () {
   cd -- "$SELFPATH" || return $?
 
   local URL='https://wiki.ubuntu.com/Releases?action=raw'
-  local CHC='releases.txt'
+  local CHC="tmp.cache.$(printf '%(%y%m%d)T' -1).releases.txt"
   local MSG=
   if [ ! -s "$CHC" ]; then
     MSG="save the text from $URL as '$CHC'"
@@ -25,8 +25,9 @@ function update_releases () {
     mv --verbose --no-target-directory -- {tmp.$$.,}"$CHC" || return $?
   fi
 
-  echo "D: Gonna parse releases page:"
-  nodemjs parseReleases.mjs || return $?
+  echo D: 'Gonna parse releases page:'
+  RELEASES_FILE="$CHC" nodemjs parseReleases.mjs || return $?$(
+    echo E: "Parsing failed, rv=$?" >&2)
 }
 
 
