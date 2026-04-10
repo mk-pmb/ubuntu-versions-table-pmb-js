@@ -3,4 +3,15 @@
 # !!  ATTN: Mind .npmignore as well!  !!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+# Auto-generated files:
 /node_modules
+/tmp.*
+
+
+
+# Host-specific files
+/*.@*
+
+
+
+# Unsorted stuff (this section should be empty):

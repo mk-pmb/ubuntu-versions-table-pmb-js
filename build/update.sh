@@ -26,7 +26,7 @@ function update_releases () {
   fi
 
   echo D: 'Gonna parse releases page:'
-  RELEASES_FILE="$CHC" nodemjs parseReleases.mjs || return $?$(
+  RELEASES_FILE="$CHC" node parseReleases.mjs || return $?$(
     echo E: "Parsing failed, rv=$?" >&2)
 }
 
