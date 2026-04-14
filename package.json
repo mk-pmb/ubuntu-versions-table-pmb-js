@@ -1,5 +1,5 @@
 { "name": "ubuntu-versions-table-pmb",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Static information about Ubuntu releases. Can find release by codename and vice versa.",
   "keywords": [],
 
@@ -23,13 +23,14 @@
 
   "dependencies": {},
   "devDependencies": {
+    "absdir": "^1.0.6",
     "equal-pmb": "^0.1.29",
-    "eslint-config-nodejs-pmb": "^0.3.13",
+    "eslint-config-nodejs-pmb": "^0.3.14",
     "eslint-plugin-json-light-pmb": "^1.0.7",
     "eslint-plugin-n": "^17.16.2",
     "eslint-pretty-pmb": "^1.0.7",
     "getoraddkey-simple": "^0.1.8",
-    "getown": "^1.0.1",
+    "getown": "^1.0.2",
     "lodash.camelcase": "^4.3.0",
     "lodash.padend": "^4.6.1",
     "lodash.padstart": "^4.6.1",

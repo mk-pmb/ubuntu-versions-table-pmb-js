@@ -2,6 +2,7 @@
 
 import 'usnam-pmb';
 
+import './toolchain.mjs';
 import './usage.mjs';
 
 console.info('+OK all tests passed.');
