@@ -10,6 +10,10 @@ vice versa.
 <!--/#echo -->
 
 
+* [Official releases list]( https://github.com/ubuntu/ubuntu-project-docs/blob/main/docs/release-team/list-of-releases.md)
+
+
+
 Limitations
 -----------
 

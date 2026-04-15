@@ -4,7 +4,6 @@ import mustBe from 'typechecks-pmb/must-be.js';
 import objPop from 'objpop';
 
 
-const verifyProduct = mustBe.oneOf(['Ubuntu'], 'product name');
 const verifySupportIndicator = mustBe.oneOf([
   undefined,
   'LTS',
@@ -12,10 +11,9 @@ const verifySupportIndicator = mustBe.oneOf([
 ], 'support indicator');
 
 
-function parseDescr(descr) {
-  const [product, verNumFull, edition] = mustBe('maxLength:3',
-    'description words')(descr.split(/ /));
-  verifyProduct(product);
+function parseVersionTitle(title) {
+  const [verNumFull, edition] = mustBe('maxLength:2',
+    'Version title words')(title.split(/ /));
   const vnPt = mustBe('maxLength:3',
     'version number parts')(verNumFull.split(/\./));
   const verNumYear = mustBe('pos int', 'major version (year)')(+vnPt[0]);
@@ -38,9 +36,9 @@ function parseDescr(descr) {
 function commonRowBasics(verDb, cellsByColName) {
   const mustPop = objPop.d(cellsByColName, { mustBe }).mustBe;
   mustPop.nest = mustPop.bind(null, 'nonEmpty str');
-  const descrFacts = parseDescr(mustPop.nest('descr'));
-  const ubuVer = verDb.byVnBase(descrFacts.verNumBase);
-  return { mustPop, ubuVer, descrFacts };
+  const titleFacts = parseVersionTitle(mustPop.nest('version'));
+  const ubuVer = verDb.byVnBase(titleFacts.verNumBase);
+  return { mustPop, ubuVer, titleFacts };
 }
 
 

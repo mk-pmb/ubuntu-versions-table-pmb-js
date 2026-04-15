@@ -2,30 +2,26 @@
 
 import 'usnam-pmb';
 
-import prFs from 'nofs';
-import toCamelCase from 'lodash.camelcase';
+import getOwn from 'getown';
 import mustBe from 'typechecks-pmb/must-be.js';
+import prFs from 'nofs';
 import sortedJson from 'sortedjson';
+import toCamelCase from 'lodash.camelcase';
+import vTry from 'vtry';
 
-import makeVersionsDb from './makeVersionsDb.mjs';
-import learnVersionRow from './learnVersionRow.mjs';
-import learnExtSecRow from './learnExtSecRow.mjs';
 import compileMiniDb from './compileMiniDb.mjs';
+import learnExtSecRow from './learnExtSecRow.mjs';
+import learnVersionRow from './learnVersionRow.mjs';
+import makeVersionsDb from './makeVersionsDb.mjs';
 
-const quot = JSON.stringify;
-
-
-function makeRgxMatcher(rx) { return rx.exec.bind(rx); }
-function trimStr(s) { return s.trim(); }
-function badVal(val, why) { throw new Error(why + ': ' + quot(val)); }
 
 const sectAliases = {
-  current: null,
   endOfLife: null,
   expandedSecurityMaintenance: 'extSec',
   extendedSecurityMaintenance: 'extSec',
-  future: null,
-  ubuntuProWithLegacySupportAddon: null,
+  futureReleases: 'future',
+  listOfCurrentReleases: 'current',
+  ubuntuProWithLegacySupportAddOn: null,
 };
 const lookupSectAlias = mustBe.tProp('Section alias for section caption ',
   sectAliases, 'nul | nonEmpty str');
@@ -33,124 +29,86 @@ const lookupSectAlias = mustBe.tProp('Section alias for section caption ',
 
 const rowParserBySect = {
   extSec: learnExtSecRow,
+  ubuntuProWithLegacySupportAddOn: 'IGNORE',
 };
 
 
-async function cliMain() {
-  const srcPath = (process.env.RELEASES_FILE || 'releases.txt');
-  let srcText = await prFs.readFile(srcPath, 'UTF-8');
-  function rp(r, t) { srcText = srcText.replace(r, t || ''); }
-
-  const srcStat = await prFs.stat(srcPath);
-  const statUts = Math.floor(srcStat.mtimeMs / 1e3);
-
-  (function fixWhitespace() {
-    rp(/\r/g);
-    rp(/[ \t]*\n+[ \t]*/g, '\n');
-    rp(/(\n#{2})\s+(\d)/g, '$1$2');
-  }());
-
-  (function cutBoringSections() {
-    let sections = srcText.split(/(?=\n={2,4})/);
-    const hasVersion = makeRgxMatcher(/(^|\n)#{2}\d/);
-    sections = sections.filter(hasVersion);
-    sections = sections.filter(s => !(
-      s.startsWith('\n=== Extended Security Maintenance ===\n')
-    ));
-    srcText = sections.join('');
-  }());
-
-  (function cutMiscNoise() {
-    srcText = '\n' + srcText + '\n';
-    rp(/(\|{2})<\w[ -;=?-~]+>/g, '$1');
-    rp(/\[{2}([ -Z_-z]*)\|?/g);
-    rp(/\]{2}/g);
-    rp(/'{3}/g);
-    rp(/\n#{2}[A-Z]*(?=\n)/g);
-    rp(/\n#{2}\d+(?:\.\d+)+(?: ESM|)(?=\n)/g);
-    rp(/\n[\w ]+ are posted on the \S+ mailing list\.?(?=\n)/);
-    rp(/\n[\w ]+ is a paid option [ -~]+(?=\n)/);
-    rp(/\n[\w ]+ old releases can be accessed at [ -~]+(?=\n)/);
-    rp(/\n[ -~]+ provides security updates on Ubuntu LTS releases[ -~]+(?=\n)/g);
-  }());
-
-  await prFs.writeFile('tmp.wikiDenoised.txt', srcText, 'UTF-8');
-
-  const versionsDb = makeVersionsDb({
-    updatedAtUnixtime: statUts,
+const EX = async function cliMain() {
+  const srcPath = (process.env.RELEASES_FILE || 'tmp.releases.jsonl');
+  const srcLines = await EX.readFileLines(srcPath);
+  EX.versionsDb = makeVersionsDb({
+    updatedAtUnixtime: srcLines.lastModifiedUts,
   });
-
-  srcText.split(/\n+(?=={2})/).forEach(function learnSect(sectText) {
-    if (!sectText) { return; }
-    const [sectCaptionLine, ...sectLines] = sectText.split(/\n/);
-    const sectCamel = (function camelizeSectionCaption() {
-      let sc = /^={2,3}([\w \-]+)={2,3}$/.exec(sectCaptionLine);
-      sc = ((sc || false)[1] || '').trim();
-      sc = sc.replace(/(^| )(\w+)-(\w+)(?= |$)/g, '$1$2$3');
-      sc = toCamelCase(sc.toLowerCase());
-      return sc;
-    }());
-    if (!sectCamel) {
-      const preview = quot(sectText.slice(0, 64));
-      throw new Error('Unable to find section title in ' + preview + '…');
-    }
-    const sectAlias = (lookupSectAlias(sectCamel) || sectCamel);
-    let colNames;
-    sectLines.forEach(function readSectLine(ln) {
-      if (!ln) { return; }
-      const pipeSplat = ln.split(/\|{2}/).map(trimStr);
-      const [nonRow, rowTitle, ...cells] = pipeSplat;
-      const fail = badVal.bind(null, pipeSplat);
-      if (nonRow) { fail('Unexpected nonRow line'); }
-      if (rowTitle === 'Version') {
-        if (colNames) { fail('Duplicate table header'); }
-        colNames = cells.filter(Boolean).map(toCamelCase);
-        return;
-      }
-      if (rowTitle.startsWith('Ubuntu ')) {
-        const byColName = {
-          descr: rowTitle,
-          section: sectAlias,
-        };
-        const parse = (rowParserBySect[sectAlias] || learnVersionRow);
-        cells.forEach(function learnCell(v, i) {
-          if (!v) { return; }
-          const k = colNames[i];
-          if (parse.ignoreCells.includes(k)) { return; }
-          if (!k) { fail('No colName for cell #' + i); }
-          const old = byColName[k];
-          if (old) { fail('Conflicting old ' + k + ': ' + quot(old)); }
-          byColName[k] = v;
-        });
-        parse(versionsDb, byColName);
-        return;
-      }
-      fail('Unexpected rowTitle');
-    });
+  srcLines.forEach(function learnLine(origLn) {
+    const [lnType, ...lnData] = JSON.parse(origLn);
+    if (!lnType) { return; }
+    const lnHnd = getOwn(EX.lineParserByType, lnType);
+    if (!lnHnd) { throw new Error('No lineParserByType.' + lnType); }
+    lnHnd(lnData);
   });
-
-  const meta = versionsDb.meta.facts;
-  meta.nVersions = Object.keys(versionsDb.data).length;
+  const meta = EX.versionsDb.meta.facts;
+  meta.nVersions = Object.keys(EX.versionsDb.data).length;
   await prFs.writeFile('tmp.fullDb.json', sortedJson({
     meta,
-    ...versionsDb.data,
+    ...EX.versionsDb.data,
   }), 'UTF-8');
-  const miniDb = compileMiniDb(versionsDb);
+  const miniDb = compileMiniDb(EX.versionsDb);
   await prFs.writeFile('../miniDb.json', miniDb, 'UTF-8');
   console.info('+OK Done, ' + meta.nVersions + ' versions in DB.');
 };
 
 
+Object.assign(EX, {
+
+  versionsDb: null,
+  curSectKey: '',
+  curSectLearnImpl: null,
+  colNames: null,
+
+  async readFileLines(path) {
+    const lines = (await prFs.readFile(path, 'UTF-8')).split(
+      '\n').filter(Boolean);
+    const stat = await prFs.stat(path);
+    lines.lastModifiedUts = Math.floor(stat.mtimeMs / 1e3);
+    return lines;
+  },
+
+  lineParserByType: {
+
+    sect(lnData) {
+      const [title] = lnData;
+      const ccTitle = toCamelCase(title);
+      const sectKey = (lookupSectAlias(ccTitle) || ccTitle);
+      EX.curSectKey = sectKey;
+      EX.curSectLearnImpl = getOwn(rowParserBySect, sectKey, learnVersionRow);
+      // console.debug('=====', sectKey, '=====');
+    },
+
+    head(lnData) {
+      EX.colNames = lnData.map(toCamelCase);
+    },
+
+    vers(lnData) {
+      const learnImpl = EX.curSectLearnImpl;
+      if (learnImpl === 'IGNORE') { return; }
+      const versRec = { section: EX.curSectKey };
+      lnData.forEach(function found(origVal, colIdx) {
+        const k = (EX.colNames[colIdx] || colIdx);
+        if (learnImpl.ignoreCells.includes(k)) { return; }
+        let v = origVal;
+        v = v.trim();
+        versRec[k] = v;
+      });
+      const rowJson = JSON.stringify(versRec, null, 2).replace(/\s+/g, ' ');
+      vTry(learnImpl, 'Learn version row ' + rowJson)(EX.versionsDb, versRec);
+    },
+
+  },
+
+
+});
 
 
 
 
-
-
-
-
-
-
-
-
-cliMain();
+EX();

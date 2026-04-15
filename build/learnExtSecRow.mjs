@@ -6,14 +6,15 @@ import rowBasics from './parseCommonRowBasics.mjs';
 import learnDateCells from './learnDateCells.mjs';
 
 const ignoreCells = [
+  'detailedEsmCoverage',
   'ofYears',
   'supportedPackages',
 ];
 
 function learn(verDb, cellsByColName) {
-  const { mustPop, ubuVer, descrFacts } = rowBasics(verDb, cellsByColName);
+  const { mustPop, ubuVer, titleFacts } = rowBasics(verDb, cellsByColName);
   mustPop.nest('section');
-  mustBe('eeq:"ESM"', 'Support indicator')(descrFacts.extraSupport);
+  mustBe('eeq:"ESM"', 'Support indicator')(titleFacts.extraSupport);
   learnDateCells(ubuVer, mustPop, [
     'startOfEsm',
     'endOfLife',

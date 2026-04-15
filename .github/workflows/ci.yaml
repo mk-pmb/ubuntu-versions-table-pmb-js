@@ -23,12 +23,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: mk-pmb/github-ci-util-2405-pmb/act/install@v1
+      - uses: mk-pmb/github-ci-util-2405-pmb/act/install@experimental
         with:
           nodejs_version: ${{ matrix.node-version }}
 
       - run: ghciu npm install .
       - run: ghciu npm test
+      - run: ./build/update.sh
+      - run: cat -- miniDb.json
+
+      - name: 'Diff the Mini DB'
+        run: |
+          git diff HEAD -- miniDb.json >tmp.miniDb.patch
+          ghciu stepsumm_dump_file tmp.miniDb.patch --open --count-lines
+
 
 
 ...

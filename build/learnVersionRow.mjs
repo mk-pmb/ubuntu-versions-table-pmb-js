@@ -24,7 +24,7 @@ const acceptableSectionProgression = [
   'future',
   'current',
   'extSec',
-  'ubuntuProWithLegacySupportAddon',
+  'ubuntuProWithLegacySupportAddOn',
 ];
 
 
@@ -37,7 +37,7 @@ function learn(verDb, cellsByColName) {
   const {
     mustPop,
     ubuVer,
-    descrFacts: descr,
+    titleFacts,
   } = rowBasics(verDb, cellsByColName);
   let audience;
 
@@ -59,7 +59,7 @@ function learn(verDb, cellsByColName) {
 
   const cnFacts = {};
   if (sectionsWithoutInterestingNewDetails.includes(section)) {
-    const { extraSupport } = descr;
+    const { extraSupport } = titleFacts;
     if (extraSupport === 'ESM') {
       if (ubuVer.getFact('extraSupport') === 'LTS') {
         ubuVer.forceUpdateFacts({ extraSupport });
@@ -77,10 +77,10 @@ function learn(verDb, cellsByColName) {
     audience = (words[3] || '').toLowerCase();
   }());
 
-  ubuVer.declareMaxNum('verNumMaxPatch', descr.verNumPatch);
-  delete descr.verNumPatch;
-  delete descr.verNumFull;
-  if (descr.verNumYear <= 8) { delete cnFacts.codenameFull; }
+  ubuVer.declareMaxNum('verNumMaxPatch', titleFacts.verNumPatch);
+  delete titleFacts.verNumPatch;
+  delete titleFacts.verNumFull;
+  if (titleFacts.verNumYear <= 8) { delete cnFacts.codenameFull; }
 
   function audienceIgnoreDesktop() {
     // Very ancient Ubuntus had separate versions for desktop and server.
@@ -88,13 +88,13 @@ function learn(verDb, cellsByColName) {
     if (audience === 'desktop') {
       mustBe.oneOf([
         '',
-      ], 'Desktop edition extra support')(descr.extraSupport);
+      ], 'Desktop edition extra support')(titleFacts.extraSupport);
       return true;
     }
     if (audience === 'server') {
       mustBe.oneOf([
         'LTS',
-      ], 'Server edition extra support')(descr.extraSupport);
+      ], 'Server edition extra support')(titleFacts.extraSupport);
       return false;
     }
     throw new Error('Unsupported audience: ' + audience);
@@ -102,7 +102,7 @@ function learn(verDb, cellsByColName) {
   if (audienceIgnoreDesktop()) { return; }
 
   ubuVer.declareFacts({
-    ...descr,
+    ...titleFacts,
     ...cnFacts,
     section,
   });
